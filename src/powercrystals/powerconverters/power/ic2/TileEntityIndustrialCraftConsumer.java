@@ -2,6 +2,7 @@ package powercrystals.powerconverters.power.ic2;
 
 import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
@@ -68,28 +69,35 @@ public class TileEntityIndustrialCraftConsumer extends TileEntityEnergyConsumer<
 		}
 		super.invalidate();
 	}
-	
+
 	@Override
-	public boolean acceptsEnergyFrom(TileEntity emitter, Direction direction)
+	public int getMaxSafeInput()
 	{
+		if(getVoltageIndex() == 3) return Integer.MAX_VALUE;
+		return getPowerSystem().getVoltageValues()[getVoltageIndex()];
+	}
+
+	@Override
+	public int getInputRate()
+	{
+		return _euLastTick;
+	}
+
+	@Override
+	public boolean acceptsEnergyFrom(TileEntity emitter,
+			ForgeDirection direction) {
 		return true;
 	}
 
 	@Override
-	public boolean isAddedToEnergyNet()
-	{
-		return _isAddedToEnergyNet;
-	}
-
-	@Override
-	public int demandsEnergy()
-	{
+	public double demandedEnergyUnits() {
 		return getTotalEnergyDemand() / PowerConverterCore.powerSystemIndustrialCraft.getInternalEnergyPerInput();
 	}
 
 	@Override
-	public int injectEnergy(Direction directionFrom, int amount)
-	{
+	public double injectEnergyUnits(ForgeDirection directionFrom, double realAmount) {
+		int amount = (int) Math.floor(realAmount);
+		
 		if(amount > getMaxSafeInput())
 		{
 			int id = worldObj.getBlockId(xCoord, yCoord, zCoord);
@@ -116,18 +124,5 @@ public class TileEntityIndustrialCraftConsumer extends TileEntityEnergyConsumer<
 		}
 		
 		return euNotStored;
-	}
-
-	@Override
-	public int getMaxSafeInput()
-	{
-		if(getVoltageIndex() == 3) return Integer.MAX_VALUE;
-		return getPowerSystem().getVoltageValues()[getVoltageIndex()];
-	}
-
-	@Override
-	public int getInputRate()
-	{
-		return _euLastTick;
 	}
 }

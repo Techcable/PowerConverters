@@ -2,22 +2,25 @@ package powercrystals.powerconverters.power.buildcraft;
 
 import java.util.Map.Entry;
 
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
-import buildcraft.api.power.IPowerProvider;
+import buildcraft.api.power.IPowerEmitter;
 import buildcraft.api.power.IPowerReceptor;
-import powercrystals.core.power.PowerProviderAdvanced;
+import buildcraft.api.power.PowerHandler;
+import buildcraft.api.power.PowerHandler.PowerReceiver;
+import buildcraft.api.power.PowerHandler.Type;
+import powercrystals.core.position.BlockPosition;
 import powercrystals.powerconverters.PowerConverterCore;
 import powercrystals.powerconverters.power.TileEntityEnergyProducer;
 
-public class TileEntityBuildCraftProducer extends TileEntityEnergyProducer<IPowerReceptor> implements IPowerReceptor
+public class TileEntityBuildCraftProducer extends TileEntityEnergyProducer<IPowerReceptor> implements IPowerEmitter
 {
-	private IPowerProvider _powerProvider;
-	
+	int mj;
 	public TileEntityBuildCraftProducer()
 	{
 		super(PowerConverterCore.powerSystemBuildCraft, 0, IPowerReceptor.class);
-		_powerProvider = new PowerProviderAdvanced();
-		_powerProvider.configure(0, 0, 0, 0, 0);
 	}
 	
 	@Override
@@ -25,44 +28,23 @@ public class TileEntityBuildCraftProducer extends TileEntityEnergyProducer<IPowe
 	{
 		int mj = energy / PowerConverterCore.powerSystemBuildCraft.getInternalEnergyPerOutput();
 		
-		for(Entry<ForgeDirection, IPowerReceptor> output : getTiles().entrySet())
-		{
-			IPowerProvider pp = output.getValue().getPowerProvider();
-			if(pp != null && pp.preConditions(output.getValue()) && pp.getMinEnergyReceived() <= mj)
-			{
-				int mjUsed = Math.min(Math.min(pp.getMaxEnergyReceived(), mj), pp.getMaxEnergyStored() - (int)Math.floor(pp.getEnergyStored()));
-				pp.receiveEnergy(mjUsed, output.getKey());
-				
-				mj -= mjUsed;
-				if(mj <= 0)
-				{
-					return 0;
-				}
-			}
+		for (ForgeDirection dir : ForgeDirection.VALID_DIRECTIONS) {
+			TileEntity tile = BlockPosition.getAdjacentTileEntity(this, dir);
+			IPowerReceptor receptor;
+			if (tile == null) continue;
+			if (tile instanceof IPowerReceptor) {
+				receptor = (IPowerReceptor) tile;
+			} else continue;
+			PowerReceiver receiver = receptor.getPowerReceiver(dir.getOpposite());
+			int usedMJ = Math.min(MathHelper.floor_float(receiver.powerRequest()), mj);
+			mj -= usedMJ;
+			receiver.receiveEnergy(Type.ENGINE, usedMJ, dir.getOpposite());
 		}
 		return mj * PowerConverterCore.powerSystemBuildCraft.getInternalEnergyPerOutput();
 	}
 
 	@Override
-	public void setPowerProvider(IPowerProvider provider)
-	{
-		_powerProvider = provider;
-	}
-
-	@Override
-	public IPowerProvider getPowerProvider()
-	{
-		return _powerProvider;
-	}
-
-	@Override
-	public void doWork()
-	{
-	}
-
-	@Override
-	public int powerRequest(ForgeDirection from)
-	{
-		return 0;
+	public boolean canEmitPowerFrom(ForgeDirection side) {
+		return true;
 	}
 }

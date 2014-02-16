@@ -1,10 +1,11 @@
 package powercrystals.powerconverters.power.ic2;
 
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.MathHelper;
+import net.minecraftforge.common.ForgeDirection;
 import net.minecraftforge.common.MinecraftForge;
 import ic2.api.Direction;
 import ic2.api.energy.event.EnergyTileLoadEvent;
-import ic2.api.energy.event.EnergyTileSourceEvent;
 import ic2.api.energy.event.EnergyTileUnloadEvent;
 import ic2.api.energy.tile.IEnergyAcceptor;
 import ic2.api.energy.tile.IEnergySource;
@@ -15,6 +16,8 @@ public class TileEntityIndustrialCraftProducer extends TileEntityEnergyProducer<
 {
 	private boolean _isAddedToEnergyNet;
 	private boolean _didFirstAddToNet;
+	
+	private int eu;
 	
 	private int _packetCount;
 	
@@ -83,43 +86,30 @@ public class TileEntityIndustrialCraftProducer extends TileEntityEnergyProducer<
 	@Override
 	public int produceEnergy(int energy)
 	{
-		if(!_isAddedToEnergyNet)
-		{
-			return energy;
-		}
-		
 		int eu = energy / PowerConverterCore.powerSystemIndustrialCraft.getInternalEnergyPerOutput();
-		
-		for(int i = 0; i < _packetCount; i++)
-		{
-			int producedEu = Math.min(eu, getMaxEnergyOutput());
-			EnergyTileSourceEvent e = new EnergyTileSourceEvent(this, producedEu);
-			MinecraftForge.EVENT_BUS.post(e);
-			eu -= (producedEu - e.amount);
-			if(e.amount == producedEu || eu < getMaxEnergyOutput())
-			{
-				break;
-			}
-		}
-		
-		return eu * PowerConverterCore.powerSystemIndustrialCraft.getInternalEnergyPerOutput();
+		int usedEu = Math.min(eu, getMaxEnergyOutput() - this.eu);
+		this.eu += usedEu;
+		return (eu - usedEu) * PowerConverterCore.powerSystemIndustrialCraft.getInternalEnergyPerOutput();
+	}
+
+
+	public int getMaxEnergyOutput()
+	{
+		return getPowerSystem().getVoltageValues()[getVoltageIndex()];
 	}
 
 	@Override
-	public boolean emitsEnergyTo(TileEntity receiver, Direction direction)
-	{
+	public boolean emitsEnergyTo(TileEntity receiver, ForgeDirection direction) {
 		return true;
 	}
 
 	@Override
-	public boolean isAddedToEnergyNet()
-	{
-		return _isAddedToEnergyNet;
+	public double getOfferedEnergy() {
+		return Math.min(eu, getMaxEnergyOutput());
 	}
 
 	@Override
-	public int getMaxEnergyOutput()
-	{
-		return getPowerSystem().getVoltageValues()[getVoltageIndex()];
+	public void drawEnergy(double amount) {
+		eu -= MathHelper.ceiling_double_int(amount);
 	}
 }

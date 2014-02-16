@@ -5,15 +5,14 @@ import org.lwjgl.opengl.GL11;
 import powercrystals.powerconverters.PowerConverterCore;
 import powercrystals.powerconverters.common.BridgeSideData;
 import powercrystals.powerconverters.common.TileEntityEnergyBridge;
-
 import net.minecraft.client.gui.inventory.GuiContainer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.ForgeDirection;
 
 public class GuiEnergyBridge extends GuiContainer
 {
 	private static final int _barColor = (255) | (165 << 8) | (0 << 16) | (255 << 24);
-	
 	protected TileEntityEnergyBridge _bridge;
 	
 	public GuiEnergyBridge(ContainerEnergyBridge container, TileEntityEnergyBridge te)
@@ -74,7 +73,7 @@ public class GuiEnergyBridge extends GuiContainer
 	protected void drawGuiContainerBackgroundLayer(float gameTicks, int mouseX, int mouseY)
 	{
 		GL11.glColor4f(1.0F, 1.0F, 1.0F, 1.0F);
-		this.mc.renderEngine.bindTexture(PowerConverterCore.guiFolder + "energybridge.png");
+		this.mc.renderEngine.bindTexture(new ResourceLocation(PowerConverterCore.guiFolder + "energybridge.png"));
 		int x = (width - xSize) / 2;
 		int y = (height - ySize) / 2;
 		this.drawTexturedModalRect(x, y, 0, 0, xSize, ySize);

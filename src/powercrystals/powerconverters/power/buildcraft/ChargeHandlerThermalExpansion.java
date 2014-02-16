@@ -1,10 +1,11 @@
 package powercrystals.powerconverters.power.buildcraft;
 
+import cofh.api.energy.IEnergyContainerItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.MathHelper;
 import powercrystals.powerconverters.PowerConverterCore;
 import powercrystals.powerconverters.common.IChargeHandler;
 import powercrystals.powerconverters.power.PowerSystem;
-import thermalexpansion.api.item.IChargeableItem;
 
 public class ChargeHandlerThermalExpansion implements IChargeHandler
 {
@@ -17,14 +18,14 @@ public class ChargeHandlerThermalExpansion implements IChargeHandler
 	@Override
 	public boolean canHandle(ItemStack stack)
 	{
-		return stack != null && stack.getItem() instanceof IChargeableItem;
+		return stack != null && stack.getItem() instanceof IEnergyContainerItem;
 	}
 
 	@Override
 	public int charge(ItemStack stack, int energyInput)
 	{
 		int mj = energyInput / getPowerSystem().getInternalEnergyPerOutput();
-		mj -= ((IChargeableItem)stack.getItem()).receiveEnergy(stack, mj, true);
+		mj -= ((IEnergyContainerItem)stack.getItem()).receiveEnergy(stack, MathHelper.floor_double(mj / 10), false) * 10;
 		return mj * getPowerSystem().getInternalEnergyPerOutput();
 	}
 
@@ -32,7 +33,7 @@ public class ChargeHandlerThermalExpansion implements IChargeHandler
 	public int discharge(ItemStack stack, int energyRequest)
 	{
 		int mj = energyRequest / getPowerSystem().getInternalEnergyPerInput();
-		mj = (int)((IChargeableItem)stack.getItem()).transferEnergy(stack, mj, true);
+		mj = (int)((IEnergyContainerItem)stack.getItem()).extractEnergy(stack, MathHelper.floor_double(mj / 10), false) * 10;
 		return mj * getPowerSystem().getInternalEnergyPerInput();
 	}
 }

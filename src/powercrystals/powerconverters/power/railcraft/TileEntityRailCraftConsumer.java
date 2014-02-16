@@ -1,6 +1,14 @@
 package powercrystals.powerconverters.power.railcraft;
 
 import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidContainerRegistry;
+import net.minecraftforge.fluids.FluidRegistry;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.liquids.ILiquidTank;
 import net.minecraftforge.liquids.ITankContainer;
 import net.minecraftforge.liquids.LiquidContainerRegistry;
@@ -9,15 +17,16 @@ import net.minecraftforge.liquids.LiquidTank;
 import powercrystals.powerconverters.PowerConverterCore;
 import powercrystals.powerconverters.power.TileEntityEnergyConsumer;
 
-public class TileEntityRailCraftConsumer extends TileEntityEnergyConsumer<ITankContainer> implements ITankContainer
+public class TileEntityRailCraftConsumer extends TileEntityEnergyConsumer<IFluidHandler> implements IFluidHandler
 {
-	private LiquidTank _steamTank;
+	private FluidTank tank;
 	private int _mBLastTick;
 	
 	public TileEntityRailCraftConsumer()
 	{
-		super(PowerConverterCore.powerSystemSteam, 0, ITankContainer.class);
-		_steamTank = new LiquidTank(1 * LiquidContainerRegistry.BUCKET_VOLUME);
+		super(PowerConverterCore.powerSystemSteam, 0, IFluidHandler.class);
+		tank = new FluidTank(1 * FluidContainerRegistry.BUCKET_VOLUME);
+		
 	}
 	
 	@Override
@@ -25,13 +34,13 @@ public class TileEntityRailCraftConsumer extends TileEntityEnergyConsumer<ITankC
 	{
 		super.updateEntity();
 		
-		if(_steamTank != null && _steamTank.getLiquid() != null)
+		if(tank != null && tank.getFluid() != null)
 		{
-			int amount = Math.min(_steamTank.getLiquid().amount, PowerConverterCore.throttleSteamConsumer.getInt());
+			int amount = Math.min(tank.getFluidAmount(), PowerConverterCore.throttleSteamConsumer.getInt());
 			int energy = amount * PowerConverterCore.powerSystemSteam.getInternalEnergyPerInput();
 			energy = storeEnergy(energy);
 			int toDrain = amount - (energy / PowerConverterCore.powerSystemSteam.getInternalEnergyPerInput());
-			_steamTank.drain(toDrain, true);
+			tank.drain(toDrain, true);
 			_mBLastTick = toDrain;
 		}
 		else
@@ -45,58 +54,45 @@ public class TileEntityRailCraftConsumer extends TileEntityEnergyConsumer<ITankC
 	{
 		return 0;
 	}
-	
-	@Override
-	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill)
-	{
-		if(resource == null || resource.itemID != PowerConverterCore.steamId)
-		{
-			return 0;
-		}
-		return _steamTank.fill(resource, doFill);
-	}
-
-	@Override
-	public int fill(int tankIndex, LiquidStack resource, boolean doFill)
-	{
-		if(resource == null || resource.itemID != PowerConverterCore.steamId)
-		{
-			return 0;
-		}
-		return _steamTank.fill(resource, doFill);
-	}
-
-	@Override
-	public LiquidStack drain(ForgeDirection from, int maxDrain, boolean doDrain)
-	{
-		return null;
-	}
-
-	@Override
-	public LiquidStack drain(int tankIndex, int maxDrain, boolean doDrain)
-	{
-		return null;
-	}
-
-	@Override
-	public ILiquidTank[] getTanks(ForgeDirection direction)
-	{
-		return new ILiquidTank [] { _steamTank };
-	}
-
-	@Override
-	public ILiquidTank getTank(ForgeDirection direction, LiquidStack type)
-	{
-		if(type != null && type.itemID == PowerConverterCore.steamId)
-		{
-			return _steamTank;
-		}
-		return null;
-	}
 
 	@Override
 	public int getInputRate()
 	{
 		return _mBLastTick;
+	}
+	@Override
+	public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
+		if (resource == null || resource.fluidID != PowerConverterCore.steamId) return 0;
+		if (doFill) {
+			return tank.fill(resource, true);
+		}
+		int usedSteam = Math.min(resource.amount, tank.getCapacity() - tank.getFluidAmount());
+		return usedSteam;
+	}
+
+	@Override
+	public FluidStack drain(ForgeDirection from, FluidStack resource,
+			boolean doDrain) {
+		return null;
+	}
+
+	@Override
+	public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
+		return null;
+	}
+
+	@Override
+	public boolean canFill(ForgeDirection from, Fluid fluid) {
+		return fluid != null && fluid.getID() == PowerConverterCore.steamId;
+	}
+
+	@Override
+	public boolean canDrain(ForgeDirection from, Fluid fluid) {
+		return false;
+	}
+
+	@Override
+	public FluidTankInfo[] getTankInfo(ForgeDirection from) {
+		return new FluidTankInfo[] {tank.getInfo()};
 	}
 }

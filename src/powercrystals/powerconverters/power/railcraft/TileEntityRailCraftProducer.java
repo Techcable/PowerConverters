@@ -2,6 +2,12 @@ package powercrystals.powerconverters.power.railcraft;
 
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
+import net.minecraftforge.fluids.Fluid;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidTank;
+import net.minecraftforge.fluids.FluidTankInfo;
+import net.minecraftforge.fluids.IFluidHandler;
+import net.minecraftforge.fluids.IFluidTank;
 import net.minecraftforge.liquids.ILiquidTank;
 import net.minecraftforge.liquids.ITankContainer;
 import net.minecraftforge.liquids.LiquidStack;
@@ -10,14 +16,14 @@ import powercrystals.core.position.BlockPosition;
 import powercrystals.powerconverters.PowerConverterCore;
 import powercrystals.powerconverters.power.TileEntityEnergyProducer;
 
-public class TileEntityRailCraftProducer extends TileEntityEnergyProducer<ITankContainer> implements ITankContainer
+public class TileEntityRailCraftProducer extends TileEntityEnergyProducer<IFluidHandler> implements IFluidHandler
 {
-	private LiquidTank _tank;
+	private FluidTank tank;
 	
 	public TileEntityRailCraftProducer()
 	{
-		super(PowerConverterCore.powerSystemSteam, 0, ITankContainer.class);
-		_tank = new LiquidTank(1);
+		super(PowerConverterCore.powerSystemSteam, 0, IFluidHandler.class);
+		tank = new FluidTank(1);
 	}
 	
 	@Override
@@ -31,9 +37,9 @@ public class TileEntityRailCraftProducer extends TileEntityEnergyProducer<ITankC
 			bp.moveForwards(1);
 			TileEntity te = worldObj.getBlockTileEntity(bp.x, bp.y, bp.z);
 			
-			if(te != null && te instanceof ITankContainer)
+			if(te != null && te instanceof IFluidHandler)
 			{
-				steam -= ((ITankContainer)te).fill(bp.orientation.getOpposite(), new LiquidStack(PowerConverterCore.steamId, steam), true);
+				steam -= ((IFluidHandler)te).fill(bp.orientation.getOpposite(), new FluidStack(PowerConverterCore.steamId, steam), true);
 			}
 			if(steam <= 0)
 			{
@@ -45,38 +51,33 @@ public class TileEntityRailCraftProducer extends TileEntityEnergyProducer<ITankC
 	}
 
 	@Override
-	public int fill(ForgeDirection from, LiquidStack resource, boolean doFill)
-	{
+	public int fill(ForgeDirection from, FluidStack resource, boolean doFill) {
 		return 0;
 	}
 
 	@Override
-	public int fill(int tankIndex, LiquidStack resource, boolean doFill)
-	{
-		return 0;
-	}
-
-	@Override
-	public LiquidStack drain(ForgeDirection from, int maxDrain, boolean doDrain)
-	{
+	public FluidStack drain(ForgeDirection from, FluidStack resource,
+			boolean doDrain) {
 		return null;
 	}
 
 	@Override
-	public LiquidStack drain(int tankIndex, int maxDrain, boolean doDrain)
-	{
+	public boolean canFill(ForgeDirection from, Fluid fluid) {
+		return false;
+	}
+
+	@Override
+	public boolean canDrain(ForgeDirection from, Fluid fluid) {
+		return false;
+	}
+
+	@Override
+	public FluidTankInfo[] getTankInfo(ForgeDirection from) {
+		return  new FluidTankInfo[] {tank.getInfo()};
+	}
+
+	@Override
+	public FluidStack drain(ForgeDirection from, int maxDrain, boolean doDrain) {
 		return null;
-	}
-
-	@Override
-	public ILiquidTank[] getTanks(ForgeDirection direction)
-	{
-		return new ILiquidTank[] { _tank };
-	}
-
-	@Override
-	public ILiquidTank getTank(ForgeDirection direction, LiquidStack type)
-	{
-		return _tank;
 	}
 }
