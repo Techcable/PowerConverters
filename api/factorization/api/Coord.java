@@ -445,7 +445,7 @@ public class Coord
   {
     TileEntity te = getTE();
     if (clazz.isInstance(te)) {
-      return te;
+      return (T) te;
     }
     return null;
   }
@@ -715,9 +715,9 @@ public class Coord
   public static void sort(Coord lower, Coord upper) {
     Coord a = lower.copy();
     Coord b = upper.copy();
-    x = Math.min(a.x, b.x);
-    y = Math.min(a.y, b.y);
-    z = Math.min(a.z, b.z);
+    lower.x = Math.min(a.x, b.x);
+    lower.y = Math.min(a.y, b.y);
+    lower.z = Math.min(a.z, b.z);
     upper.x = Math.max(a.x, b.x);
     upper.y = Math.max(a.y, b.y);
     upper.z = Math.max(a.z, b.z);

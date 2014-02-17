@@ -131,7 +131,10 @@ public class RecipeQArmorDye extends RecipesArmorDyes {
 		l = (int)(l * f / f1);
 		i1 = (k << 8) + l1;
 		i1 = (i1 << 8) + l;
-		itemarmor.colorQArmor(itemstack, i1);
+		/*
+		 * This method does not exist so I killed it
+		 * itemarmor.colorQArmor(itemstack, i1);
+		 */
 		return itemstack;
 	}
 }

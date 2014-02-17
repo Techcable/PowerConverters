@@ -32,7 +32,7 @@ public class ChargeMetalBlockConductance
 
   public static void taintBlock(Coord c) {
     int blockID = c.getId(); int md = c.getMd();
-    if ((validBlocks[blockID] == null) || (validBlocks[blockID][md] == 0)) {
+    if ((validBlocks[blockID] == null) || !validBlocks[blockID][md]) {
       return;
     }
     if (c.getTE() != null) {

@@ -49,7 +49,7 @@ class ConductorSet
     }
     if ((luckyNeighbor.memberCount + memberCount < 24) && (luckyNeighbor.memberCount <= memberCount))
     {
-      Iterable noms = luckyNeighbor.getMembers(luckyNeighbor.leader);
+      Iterable<IChargeConductor> noms = luckyNeighbor.getMembers(luckyNeighbor.leader);
       totalCharge += luckyNeighbor.totalCharge;
       for (IChargeConductor nom : noms)
       {

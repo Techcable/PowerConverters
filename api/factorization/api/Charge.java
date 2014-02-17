@@ -91,7 +91,7 @@ public class Charge
       ConductorSet assignedConductorSet = new ConductorSet(conductor);
       return;
     }
-    Iterable neighbors = here.getNeighborsAdjacent();
+    Iterable<Coord> neighbors = here.getNeighborsAdjacent();
     for (Coord n : neighbors) {
       ChargeMetalBlockConductance.taintBlock(n);
       IChargeConductor neighbor = (IChargeConductor)n.getTE(IChargeConductor.class);

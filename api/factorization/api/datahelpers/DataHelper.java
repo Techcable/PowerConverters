@@ -45,28 +45,28 @@ public abstract class DataHelper
       return o;
     }
     if ((o instanceof IDataSerializable)) {
-      return ((IDataSerializable)o).serialize(name, this);
+      return (E) ((IDataSerializable)o).serialize(name, this);
     }
     if ((o instanceof Enum)) {
       Enum value = (Enum)o;
       int i = value.ordinal();
       i = ((Integer)put(Integer.valueOf(i))).intValue();
       if (isWriter()) {
-        return value;
+        return (E) value;
       }
-      return ((Enum[])value.getClass().getEnumConstants())[i];
+      return (E) ((Enum[])value.getClass().getEnumConstants())[i];
     }
     if ((o instanceof ItemStack)) {
       ItemStack value = (ItemStack)o;
       NBTTagCompound writtenTag = value.writeToNBT(new NBTTagCompound());
       if (isReader()) {
-        return ItemStack.loadItemStackFromNBT((NBTTagCompound)put(writtenTag));
+        return (E) ItemStack.loadItemStackFromNBT((NBTTagCompound)put(writtenTag));
       }
       put(writtenTag);
       return o;
     }
 
-    return putImplementation(o);
+    return (E) putImplementation(o);
   }
 
   protected abstract <E> Object putImplementation(E paramE)
@@ -111,7 +111,7 @@ public abstract class DataHelper
     return (NBTTagCompound)put(value);
   }
   public final <E extends Enum> E putEnum(E value) throws IOException {
-    return (Enum)put(value);
+    return (E) (Enum)put(value);
   }
 
   public final Object putUntypedOject(Object value)
