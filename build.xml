@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<project name="PowerConverters" default="clean,install">
+	<property name="build.dir" value="bin"/>
+	<property name="src.dir" value="src"/>
+<target name="compile">
+	<mkdir dir="${build.dir}"/>
+	<javac source="1.6" target="1.6">
+		<src path="${src.dir}"/>
+		<classpath></classpath>
+	</javac>
+</target>
+</project>
